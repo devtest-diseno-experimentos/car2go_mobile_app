@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/car_card.dart';
 import '../screens/car_form_screen.dart';
-import '../screens/car_detail_screen.dart'; // 👈 Importa la pantalla de detalle
-
+import '../screens/car_detail_screen.dart'; 
 class MyCarsScreen extends StatelessWidget {
   const MyCarsScreen({super.key});
 

@@ -49,13 +49,18 @@ class CarDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Badge revisado
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Text('Revisado', style: TextStyle(color: Colors.white)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text('Revisado', style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
 
             const SizedBox(height: 16),
@@ -89,9 +94,13 @@ class CarDetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Specs
-            Wrap(
-              spacing: 8,
-              runSpacing: 12,
+            // Specs
+            GridView.count(
+              crossAxisCount: 4, // Número de columnas
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 12,
+              shrinkWrap: true, // Permite que el GridView se ajuste al contenido
+              physics: const NeverScrollableScrollPhysics(), // Desactiva el scroll interno
               children: const [
                 _SpecIcon(icon: Icons.calendar_today, label: '2023'),
                 _SpecIcon(icon: Icons.speed, label: '25,000 km'),
