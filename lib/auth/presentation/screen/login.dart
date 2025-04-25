@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/main.dart';
 import 'package:car2go_mobile_app/auth/presentation/screen/register.dart';
+import 'package:car2go_mobile_app/auth/data/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,6 +15,16 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   double _sheetExtent = 0.15;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +47,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            // Text shown when sheet is expanded
             if (_sheetExtent > 0.25)
               Positioned(
                 top: 80,
@@ -61,7 +73,6 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-            // Prompt when sheet is small
             if (_sheetExtent <= 0.15)
               Positioned(
                 left: 20,
@@ -136,6 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 24),
                       TextField(
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'E-mail',
@@ -147,6 +159,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 16),
                       TextField(
+                        controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
@@ -184,14 +197,45 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MyApp(initialIndex: 0),
-                            ),
-                                (route) => false,
-                          );
+                        onPressed: () async {
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text;
+
+                          final result = await AuthService.login(email, password);
+
+                          if (result != null) {
+                            final username = result['username'];
+                            final token = result['token'];
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('username', username);
+                            await prefs.setString('token', token);
+
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('✅ Inicio de sesión correcto: $username'),
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+
+                            await Future.delayed(const Duration(seconds: 1));
+
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MyApp(initialIndex: 0),
+                              ),
+                                  (route) => false,
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('❌ Credenciales incorrectas'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2959AD),

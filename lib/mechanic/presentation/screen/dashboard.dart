@@ -1,24 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:provider/provider.dart';
+import 'package:car2go_mobile_app/mechanic/data/providers/mechanic_provider.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
+  @override
+  _DashboardScreenState createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final mechanicProvider = Provider.of<MechanicProvider>(context, listen: false);
+    mechanicProvider.loadVehicles();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          _buildCard("Autos verificados", 0.25, Colors.redAccent),
-          SizedBox(height: 20),
-          _buildCard("Lista de espera", 0.79, Colors.green),
-        ],
+    final mechanicProvider = Provider.of<MechanicProvider>(context);
+
+    return RefreshIndicator(
+      onRefresh: () => mechanicProvider.loadVehicles(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                // TODO: Navegar a la lista de autos revisados
+              },
+              child: _buildCard(
+                title: "Autos Verificados",
+                percentage: mechanicProvider.reviewedPercentage,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                // TODO: Navegar a la lista de autos pendientes
+              },
+              child: _buildCard(
+                title: "Lista de Espera",
+                percentage: mechanicProvider.pendingPercentage,
+                color: Colors.orangeAccent,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCard(String title, double percentage, Color color) {
+  Widget _buildCard({
+    required String title,
+    required double percentage,
+    required Color color,
+  }) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -29,13 +71,19 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-          SizedBox(height: 20),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 20),
           CircularPercentIndicator(
             radius: 100.0,
             lineWidth: 16.0,
-            percent: percentage,
-            center: Text("${(percentage * 100).toInt()}%", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            percent: (percentage > 1.0 ? 1.0 : percentage),
+            center: Text(
+              "${(percentage * 100).toInt()}%",
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
             progressColor: color,
             backgroundColor: Colors.grey.shade200,
             circularStrokeCap: CircularStrokeCap.round,
