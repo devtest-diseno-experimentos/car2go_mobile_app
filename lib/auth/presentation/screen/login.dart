@@ -1,240 +1,235 @@
+import 'package:car2go_mobile_app/auth/presentation/screen/register.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _obscurePassword = true;
+  double _sheetExtent = 0.15;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        scrollDirection: Axis.vertical,
-        children: const [_SlideUpPrompt(), _LoginForm()],
-      ),
-    );
-  }
-}
-
-//slide up prompt
-class _SlideUpPrompt extends StatelessWidget {
-  const _SlideUpPrompt();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFFEB040), Color(0xFFF3B860)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Positioned(
-          //   bottom: 50,
-          //   left: 20,
-          //   right: 20,
-          //   child: Image.asset(
-          //     'assets/images/car.png',
-          //     fit: BoxFit.contain,
-          //     height: 180,
-          //   ),
-          // ),
-          Positioned(
-            left: 20,
-            bottom: 80,
-            child: Text(
-              'Desliza hacia arriba\npara iniciar sesión.',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 40,
-            left: 0,
-            right: 0,
-            child: Icon(
-              Icons.keyboard_double_arrow_up,
-              size: 32,
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// login form
-class _LoginForm extends StatefulWidget {
-  const _LoginForm();
-
-  @override
-  __LoginFormState createState() => __LoginFormState();
-}
-
-class __LoginFormState extends State<_LoginForm> {
-  bool _obscurePassword = true;
-  final bool _isVendedor = false;
-  final bool _isComprador = false;
-  final bool _isMecanico = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
+      body: NotificationListener<DraggableScrollableNotification>(
+        onNotification: (notification) {
+          setState(() {
+            _sheetExtent = notification.extent;
+          });
+          return true;
+        },
+        child: Stack(
           children: [
+            // background gradient
             Container(
-              height: 200,
               decoration: const BoxDecoration(
-                color: Color(0xFFFEB040),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFFC107), Color(0xFFD9965B)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
-              child: Stack(
-                children: [
-                  const Positioned(
-                    left: 20,
-                    bottom: 20,
-                    child: Text(
-                      'Hola.\n¡Bienvenido de nuevo!',
+            ),
+            // only show top text if sheet is expanded
+            if (_sheetExtent > 0.25)
+              Positioned(
+                top: 80,
+                left: 24,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Hola.',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '¡Bienvenido de nuevo!',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  // ► Imagen comentada:
-                  // Positioned(
-                  //   top: 20,
-                  //   right: 20,
-                  //   child: Image.asset(
-                  //     'assets/images/car.png',
-                  //     width: 160,
-                  //     fit: BoxFit.contain,
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-
-            // ===== FORMULARIO =====
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Ingresa tu cuenta',
+            // prompt
+            if (_sheetExtent <= 0.15)
+              Positioned(
+                left: 20,
+                bottom: 160,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Desliza hacia arriba',
                       style: TextStyle(
-                        fontSize: 20,
+                        color: Colors.black,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // E-mail
-                  TextField(
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'E-mail',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    Text(
+                      'para iniciar sesión.',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Contraseña
-                  TextField(
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Contraseña',
-                      hintText: 'Ingresa tu contraseña',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed:
-                            () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                      ),
+                    SizedBox(height: 8),
+                    Icon(
+                      Icons.keyboard_double_arrow_up,
+                      size: 32,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            DraggableScrollableSheet(
+              initialChildSize: 0.15,
+              minChildSize: 0.15,
+              maxChildSize: 0.65,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(40),
                     ),
                   ),
-                  const SizedBox(height: 8),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // TODO: recuperar contraseña
-                      },
-                      child: const Text('¿Olvidaste tu contraseña?'),
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: lógica de login
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Acceder',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Link a registrarse
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('¿No tienes una cuenta? '),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: navegar a RegisterPage
-                        },
-                        child: const Text(
-                          'Regístrate',
-                          style: TextStyle(
-                            color: Color(0xFFFEB040),
-                            fontWeight: FontWeight.bold,
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 24),
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.all(Radius.circular(2)),
                           ),
+                        ),
+                      ),
+                      const Center(
+                        child: Text(
+                          'Ingresa tu cuenta',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      TextField(
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'E-mail',
+                          labelStyle: TextStyle(color: Colors.black87),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Contraseña',
+                          hintText: 'Ingresa tu contraseña',
+                          hintStyle: TextStyle(color: Colors.black38),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            // TODO: password recovery
+                          },
+                          child: const Text(
+                            '¿Olvidaste tu contraseña?',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          // TODO: login logic
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2959AD),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: const Size.fromHeight(50),
+                        ),
+                        child: const Text(
+                          'Acceder',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('¿No tienes una cuenta? '),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const RegisterPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Regístrate',
+                                style: TextStyle(
+                                  color: Color(0xFFFFC107),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),
