@@ -6,16 +6,20 @@ import 'package:car2go_mobile_app/shared/widgets/custom_bottom_nav.dart';
 import 'package:car2go_mobile_app/shared/widgets/custom_app_bar.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  final int initialIndex;
+
+  const MyApp({Key? key, this.initialIndex = 0}) : super(key: key);
+
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
     GlobalKey<NavigatorState>(),
@@ -23,9 +27,17 @@ class _MyAppState extends State<MyApp> {
     GlobalKey<NavigatorState>(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
+  bool get _showBars => true;
+
   void _onTabTapped(int index) {
     if (_currentIndex == index) {
-      _navigatorKeys[index].currentState!.popUntil((route) => route.isFirst);
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
     } else {
       setState(() {
         _currentIndex = index;
@@ -46,7 +58,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       home: Scaffold(
-        appBar: const CustomAppBar(),
+        appBar: _showBars ? const CustomAppBar() : null,
         body: Stack(
           children: List.generate(_navigatorKeys.length, (index) {
             return Offstage(
@@ -62,10 +74,12 @@ class _MyAppState extends State<MyApp> {
             );
           }),
         ),
-        bottomNavigationBar: CustomBottomNavBar(
+        bottomNavigationBar: _showBars
+            ? CustomBottomNavBar(
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
-        ),
+        )
+            : null,
       ),
     );
   }
@@ -83,4 +97,3 @@ class _MyAppState extends State<MyApp> {
     }
   }
 }
-

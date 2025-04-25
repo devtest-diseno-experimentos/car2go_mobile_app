@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:car2go_mobile_app/auth/presentation/screen/login.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
@@ -37,23 +38,34 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                    width: 3,
-                  ),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/profile.jpg'),
-                    fit: BoxFit.cover,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                      width: 3,
+                    ),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/profile.jpg'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
             ),
+
           ],
         ),
       ),
