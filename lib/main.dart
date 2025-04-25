@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/mechanic/presentation/screen/dashboard.dart';
 import 'package:car2go_mobile_app/mechanic/presentation/screen/technical_review.dart';
+import 'package:car2go_mobile_app/seller/presentation/screens/my_cars_screen.dart';
 import 'package:car2go_mobile_app/shared/widgets/custom_bottom_nav.dart';
 import 'package:car2go_mobile_app/shared/widgets/custom_app_bar.dart';
 
@@ -17,6 +18,7 @@ class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
   ];
@@ -74,6 +76,8 @@ class _MyAppState extends State<MyApp> {
         return DashboardScreen();
       case 1:
         return TechnicalReviewScreen();
+      case 2:
+        return MyCarsScreen();
       default:
         return DashboardScreen();
     }

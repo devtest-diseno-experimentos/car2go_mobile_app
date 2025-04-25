@@ -33,6 +33,10 @@ class CustomBottomNavBar extends StatelessWidget {
             icon: _buildCustomIcon(Icons.grid_view_rounded, currentIndex == 1),
             label: "",
           ),
+          NavigationDestination(
+            icon: _buildCustomIcon(Icons.shopping_bag_outlined, currentIndex == 2),
+            label: "",
+          ),
         ],
       ),
     );

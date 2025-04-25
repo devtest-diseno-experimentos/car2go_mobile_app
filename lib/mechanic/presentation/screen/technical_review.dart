@@ -68,7 +68,7 @@ class TechnicalReviewScreen extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
-                            'assets/car.png',
+                            'assets/images/car.png',
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 300,
