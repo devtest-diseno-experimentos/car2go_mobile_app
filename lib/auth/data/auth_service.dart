@@ -4,6 +4,7 @@ import 'package:car2go_mobile_app/shared/constants/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
+  // Iniciar sesión
   static Future<Map<String, dynamic>?> login(String username, String password) async {
     final url = Uri.parse(Constant.getEndpoint('authentication/sign-in'));
 
@@ -33,5 +34,17 @@ class AuthService {
       print("Login error: ${response.statusCode}");
       return null;
     }
+  }
+
+  // Cerrar sesión
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // elimina todos los datos guardados
+  }
+
+  // Verificar si hay sesión activa
+  static Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('token');
   }
 }
