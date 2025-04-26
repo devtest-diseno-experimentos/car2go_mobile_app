@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:car2go_mobile_app/mechanic/data/models/vehicle_model.dart';
-import 'package:car2go_mobile_app/mechanic/data/services/vehicle_service.dart';
+import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
+import 'package:car2go_mobile_app/seller/data/services/vehicle_service.dart';
 
 class MechanicProvider with ChangeNotifier {
   List<Vehicle> _allVehicles = [];

@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:car2go_mobile_app/mechanic/data/providers/mechanic_provider.dart';
 import 'package:car2go_mobile_app/mechanic/presentation/screen/review_history.dart';
+import 'package:car2go_mobile_app/mechanic/presentation/screen/vehicle_review.dart';
 
-class TechnicalReviewScreen extends StatelessWidget {
-  final List<String> cars = ['Darcia Bigster SUV', 'Renault Kwid'];
+class TechnicalReviewScreen extends StatefulWidget {
+  @override
+  _TechnicalReviewScreenState createState() => _TechnicalReviewScreenState();
+}
+
+class _TechnicalReviewScreenState extends State<TechnicalReviewScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<MechanicProvider>(context, listen: false).loadVehicles();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final mechanicProvider = Provider.of<MechanicProvider>(context);
+    final pendingVehicles = mechanicProvider.pendingVehicles;
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,8 +47,7 @@ class TechnicalReviewScreen extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2959AD),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 26, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -46,11 +60,13 @@ class TechnicalReviewScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-
             Expanded(
-              child: ListView.builder(
-                itemCount: cars.length,
+              child: pendingVehicles.isEmpty
+                  ? const Center(child: Text('No hay autos en espera'))
+                  : ListView.builder(
+                itemCount: pendingVehicles.length,
                 itemBuilder: (context, index) {
+                  final vehicle = pendingVehicles[index];
                   return Container(
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: BoxDecoration(
@@ -67,7 +83,22 @@ class TechnicalReviewScreen extends StatelessWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
+                          child: vehicle.image.isNotEmpty
+                              ? Image.network(
+                            vehicle.image.first,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 300,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'assets/images/car.png',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 300,
+                              );
+                            },
+                          )
+                              : Image.asset(
                             'assets/images/car.png',
                             fit: BoxFit.cover,
                             width: double.infinity,
@@ -79,29 +110,42 @@ class TechnicalReviewScreen extends StatelessWidget {
                           left: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 26, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 8),
                             decoration: const BoxDecoration(
                               color: Colors.white70,
-                              borderRadius: BorderRadius.vertical(
-                                  bottom: Radius.circular(8)),
+                              borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  cars[index],
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Text(
+                                    "${vehicle.brand} ${vehicle.model}",
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
+                                const SizedBox(width: 8),
                                 ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VehicleReviewScreen(vehicleId: vehicle.id),
+                                      ),
+                                    );
+
+                                    if (result == true) {
+                                      Provider.of<MechanicProvider>(context, listen: false).loadVehicles();
+                                    }
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFF4C23D),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 26, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 8),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),

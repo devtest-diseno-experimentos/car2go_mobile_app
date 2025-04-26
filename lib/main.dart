@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:car2go_mobile_app/mechanic/data/providers/mechanic_provider.dart';
+import 'package:car2go_mobile_app/mechanic/data/providers/review_provider.dart';
 import 'package:car2go_mobile_app/mechanic/presentation/screen/dashboard.dart';
 import 'package:car2go_mobile_app/mechanic/presentation/screen/technical_review.dart';
 import 'package:car2go_mobile_app/seller/presentation/screens/my_cars_screen.dart';
@@ -9,8 +10,11 @@ import 'package:car2go_mobile_app/shared/widgets/custom_app_bar.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => MechanicProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MechanicProvider()),
+        ChangeNotifierProvider(create: (_) => ReviewProvider()),
+      ],
       child: const MyApp(),
     ),
   );
