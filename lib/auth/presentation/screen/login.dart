@@ -5,6 +5,7 @@ import 'package:car2go_mobile_app/auth/data/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
+// Login
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -12,6 +13,7 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
+//Login State
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   double _sheetExtent = 0.15;
