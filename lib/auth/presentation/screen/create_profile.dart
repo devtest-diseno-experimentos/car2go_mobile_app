@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/auth/data/auth_service.dart';
+import 'package:car2go_mobile_app/mechanic/presentation/screen/dashboard.dart';
 
 class CreateProfilePage extends StatefulWidget {
   const CreateProfilePage({super.key});
@@ -59,7 +60,11 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -73,22 +78,19 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear perfil'),
-        backgroundColor: Colors.black,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 40),
               const Text(
-                'Crear profile',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+                'Crear perfil',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.left,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               TextField(
                 controller: _firstNameController,
                 decoration: const InputDecoration(
@@ -148,22 +150,44 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
               ElevatedButton(
                 onPressed: _saveProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: const Color(
+                    0xFF2959AD,
+                  ), // Color de fondo #2959AD
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: const Size.fromHeight(50),
                 ),
                 child: const Text(
                   'Guardar',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ), // Letra color negro
                 ),
               ),
               const SizedBox(height: 16),
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(
+                    0xFFB2CEFF,
+                  ), // Color de fondo #B2CEFF
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: const Size.fromHeight(50),
+                ),
                 child: const Text(
                   'Volver',
-                  style: TextStyle(color: Colors.blue),
+                  style: TextStyle(
+                    color: Color(0xFF2959AD),
+                    fontSize: 16,
+                  ), // Letra color #2959AD
                 ),
               ),
             ],

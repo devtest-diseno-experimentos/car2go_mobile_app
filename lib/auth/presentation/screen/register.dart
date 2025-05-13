@@ -39,21 +39,36 @@ class _RegisterPageState extends State<RegisterPage> {
 
     final roles = [roleMap[_selectedRole]!];
 
-    final success = await AuthService.register(username, password, roles);
+    // Registrar al usuario
+    final registerSuccess = await AuthService.register(
+      username,
+      password,
+      roles,
+    );
 
-    if (success) {
+    if (registerSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Registro exitoso.'),
+          content: Text('✅ Registro exitoso. Iniciando sesión...'),
           backgroundColor: Colors.green,
         ),
       );
 
-      // Navegar a la página de creación de perfil
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const CreateProfilePage()),
-      );
+      final loginResponse = await AuthService.login(username, password);
+
+      if (loginResponse != null && loginResponse['token'] != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateProfilePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Error al iniciar sesión después del registro.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

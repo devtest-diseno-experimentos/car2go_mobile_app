@@ -66,21 +66,39 @@ class AuthService {
   }) async {
     final url = Uri.parse(Constant.getEndpoint('profiles'));
 
+    // Obtener el token almacenado en SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      print("❌ Error: No se encontró un token de autenticación.");
+      return false;
+    }
+
+    // Cuerpo de la solicitud con paymentMethods hardcodeado
+    final body = jsonEncode({
+      "firstName": firstName,
+      "lastName": lastName,
+      "email": email,
+      "dni": dni,
+      "address": address,
+      "phone": phone,
+      "image": image,
+      "paymentMethods": [
+        {"id": 0, "type": "BBVA", "details": "12345678912345678912"},
+      ],
+    });
+
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "firstName": firstName,
-        "lastName": lastName,
-        "email": email,
-        "dni": dni,
-        "address": address,
-        "phone": phone,
-        "image": image,
-      }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", // Agregar el token en los encabezados
+      },
+      body: body,
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       print("✅ Perfil creado exitosamente.");
       return true;
     } else {
