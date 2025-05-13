@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:car2go_mobile_app/mechanic/data/providers/mechanic_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -12,7 +14,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final mechanicProvider = Provider.of<MechanicProvider>(context, listen: false);
+    final mechanicProvider = Provider.of<MechanicProvider>(
+      context,
+      listen: false,
+    );
     mechanicProvider.loadVehicles();
   }
 

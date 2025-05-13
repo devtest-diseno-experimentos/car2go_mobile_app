@@ -23,7 +23,7 @@ void main() {
 class MyApp extends StatefulWidget {
   final int initialIndex;
 
-  const MyApp({Key? key, this.initialIndex = 0}) : super(key: key);
+  const MyApp({super.key, this.initialIndex = 0});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -85,12 +85,13 @@ class _MyAppState extends State<MyApp> {
             );
           }),
         ),
-        bottomNavigationBar: _showBars
-            ? CustomBottomNavBar(
-          currentIndex: _currentIndex,
-          onTap: _onTabTapped,
-        )
-            : null,
+        bottomNavigationBar:
+            _showBars
+                ? CustomBottomNavBar(
+                  currentIndex: _currentIndex,
+                  onTap: _onTabTapped,
+                )
+                : null,
       ),
     );
   }
