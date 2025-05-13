@@ -61,7 +61,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
         ),
       );
 
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );

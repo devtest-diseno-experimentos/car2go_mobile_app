@@ -4,7 +4,6 @@ import 'package:car2go_mobile_app/shared/constants/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  // Iniciar sesión
   static Future<Map<String, dynamic>?> login(
     String username,
     String password,
@@ -23,8 +22,13 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['token']);
       await prefs.setString('username', data['username']);
+      await prefs.setInt('userId', data['id']);
 
-      return {'token': data['token'], 'username': data['username']};
+      return {
+        'token': data['token'],
+        'username': data['username'],
+        'id': data['id'],
+      };
     } else {
       print("Login error: ${response.statusCode}");
       return null;
@@ -66,16 +70,15 @@ class AuthService {
   }) async {
     final url = Uri.parse(Constant.getEndpoint('profiles'));
 
-    // Obtener el token almacenado en SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
+    final userId = prefs.getInt('userId');
 
-    if (token == null) {
-      print("❌ Error: No se encontró un token de autenticación.");
+    if (token == null || userId == null) {
+      print("❌ Error: No se encontró un token o id de usuario.");
       return false;
     }
 
-    // Cuerpo de la solicitud con paymentMethods hardcodeado
     final body = jsonEncode({
       "firstName": firstName,
       "lastName": lastName,
@@ -85,7 +88,7 @@ class AuthService {
       "phone": phone,
       "image": image,
       "paymentMethods": [
-        {"id": 0, "type": "BBVA", "details": "12345678912345678912"},
+        {"id": userId, "type": "BBVA", "details": "12345678912345678912"},
       ],
     });
 
@@ -93,7 +96,7 @@ class AuthService {
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $token", // Agregar el token en los encabezados
+        "Authorization": "Bearer $token",
       },
       body: body,
     );
@@ -108,13 +111,11 @@ class AuthService {
     }
   }
 
-  // Cerrar sesión
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // elimina todos los datos guardados
+    await prefs.clear();
   }
 
-  // Verificar si hay sesión activa
   static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('token');
