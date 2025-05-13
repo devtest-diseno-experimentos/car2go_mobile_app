@@ -1,4 +1,6 @@
+import 'package:car2go_mobile_app/auth/presentation/screen/create_profile.dart';
 import 'package:flutter/material.dart';
+import 'package:car2go_mobile_app/auth/data/auth_service.dart';
 import 'package:car2go_mobile_app/auth/presentation/screen/login.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -9,8 +11,58 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String _selectedRole = '';
+
+  void _register() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty || _selectedRole.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, completa todos los campos.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Map role selection to backend roles
+    final roleMap = {
+      'vendedor': 'ROLE_SELLER',
+      'comprador': 'ROLE_BUYER',
+      'mecanico': 'ROLE_MECHANIC',
+    };
+
+    final roles = [roleMap[_selectedRole]!];
+
+    final success = await AuthService.register(username, password, roles);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Registro exitoso.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navegar a la página de creación de perfil
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const CreateProfilePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ Error al registrar el usuario.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +74,9 @@ class _RegisterPageState extends State<RegisterPage> {
             Container(
               height: MediaQuery.of(context).size.height * 0.2,
               decoration: const BoxDecoration(color: Color(0xFFFFC107)),
-              child: Stack(
+              child: const Stack(
                 children: [
-                  const Positioned(
+                  Positioned(
                     left: 20,
                     bottom: 20,
                     child: Column(
@@ -87,6 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 24),
                       TextField(
+                        controller: _usernameController,
                         decoration: InputDecoration(
                           labelText: 'Nombre',
                           border: OutlineInputBorder(
@@ -96,17 +149,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16),
                       TextField(
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'E-mail',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
                         obscureText: _obscurePassword,
+                        controller: _passwordController,
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
                           hintText: 'Ingresa tu contraseña',
@@ -125,16 +169,6 @@ class _RegisterPageState extends State<RegisterPage> {
                               });
                             },
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            // TODO: forgot password action
-                          },
-                          child: const Text('¿Olvidaste tu contraseña?'),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -208,9 +242,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: () {
-                          // TODO: register action
-                        },
+                        onPressed: _register,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           backgroundColor: const Color(0xFF2959AD),
@@ -219,7 +251,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         child: const Text(
-                          'Acceder',
+                          'Registrarse',
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                       ),

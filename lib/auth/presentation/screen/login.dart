@@ -4,7 +4,6 @@ import 'package:car2go_mobile_app/auth/presentation/screen/register.dart';
 import 'package:car2go_mobile_app/auth/data/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 // Login
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -152,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: 'E-mail',
+                          labelText: 'Nombre de usuario',
                           labelStyle: TextStyle(color: Colors.black87),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -203,7 +202,10 @@ class _LoginPageState extends State<LoginPage> {
                           final email = _emailController.text.trim();
                           final password = _passwordController.text;
 
-                          final result = await AuthService.login(email, password);
+                          final result = await AuthService.login(
+                            email,
+                            password,
+                          );
 
                           if (result != null) {
                             final username = result['username'];
@@ -212,10 +214,11 @@ class _LoginPageState extends State<LoginPage> {
                             await prefs.setString('username', username);
                             await prefs.setString('token', token);
 
-
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('✅ Inicio de sesión correcto: $username'),
+                                content: Text(
+                                  '✅ Inicio de sesión correcto: $username',
+                                ),
                                 backgroundColor: Colors.green,
                                 duration: const Duration(seconds: 2),
                               ),
@@ -226,9 +229,10 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const MyApp(initialIndex: 0),
+                                builder:
+                                    (context) => const MyApp(initialIndex: 0),
                               ),
-                                  (route) => false,
+                              (route) => false,
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
