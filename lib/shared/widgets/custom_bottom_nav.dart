@@ -1,54 +1,50 @@
 import 'package:flutter/material.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
-  final int currentIndex;
-  final Function(int) onTap;
+  final String role;
+  final String currentRouteKey;
+  final void Function(String routeKey) onNavigate;
 
-  const CustomBottomNavBar({ super.key, required this.currentIndex, required this.onTap,});
+  const CustomBottomNavBar({
+    super.key,
+    required this.role,
+    required this.currentRouteKey,
+    required this.onNavigate,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: NavigationBar(
-        onDestinationSelected: onTap,
-        selectedIndex: currentIndex,
-        indicatorColor: const Color(0xFFEFF8FF),
-        backgroundColor: Colors.white,
-        destinations: [
-          NavigationDestination(
-            icon: _buildCustomIcon(Icons.home, currentIndex == 0),
-            label: "",
-          ),
-          NavigationDestination(
-            icon: _buildCustomIcon(Icons.grid_view_rounded, currentIndex == 1),
-            label: "",
-          ),
-          NavigationDestination(
-            icon: _buildCustomIcon(Icons.shopping_bag_outlined, currentIndex == 2),
-            label: "",
-          ),
-        ],
-      ),
-    );
-  }
+    final destinations = <Map<String, dynamic>>[];
 
-  Widget _buildCustomIcon(IconData icon, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      child: Icon(
-        icon,
-        color: isSelected ? const Color(0xFF2959AD) : Colors.black,
-      ),
+    if (role == 'ROLE_MECHANIC') {
+      destinations.addAll([
+        {'icon': Icons.home, 'label': 'Dashboard', 'routeKey': 'dashboard'},
+        {'icon': Icons.grid_view_rounded, 'label': 'Review', 'routeKey': 'review'},
+      ]);
+    } else if (role == 'ROLE_SELLER') {
+      destinations.addAll([
+        {'icon': Icons.directions_car_filled_outlined, 'label': 'My Cars', 'routeKey': 'myCars'},
+        {'icon': Icons.add_circle_outline, 'label': 'Add Car', 'routeKey': 'CarForm'},
+      ]);
+    }
+
+    final currentIndex = destinations.indexWhere(
+          (dest) => dest['routeKey'] == currentRouteKey,
+    );
+
+    return NavigationBar(
+      backgroundColor: Colors.white,
+      indicatorColor: const Color(0xFFEFF8FF),
+      selectedIndex: currentIndex >= 0 ? currentIndex : 0,
+      destinations: destinations.map((dest) {
+        return NavigationDestination(
+          icon: Icon(dest['icon']),
+          label: dest['label'],
+        );
+      }).toList(),
+      onDestinationSelected: (index) {
+        onNavigate(destinations[index]['routeKey']);
+      },
     );
   }
 }

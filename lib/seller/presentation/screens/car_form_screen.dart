@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/screens/main_screen.dart';
 
 class CarFormScreen extends StatelessWidget {
   const CarFormScreen({super.key});
@@ -9,25 +10,11 @@ class CarFormScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            100,
-          ), // 👈 espacio para el botón abajo
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Formulario de venta',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ],
+            const Text(
+              'Formulario de venta',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -96,15 +83,18 @@ class CarFormScreen extends StatelessWidget {
               foregroundColor: Colors.white,
               textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('¡Carro publicado exitosamente!')),
-              );
-              Future.delayed(const Duration(seconds: 1), () {
-                Navigator.pop(context);
-              });
-            },
-            child: const Text('Publicar carro'),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('¡Carro publicado exitosamente!')),
+                );
+                Future.delayed(const Duration(seconds: 1), () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainScreen()),
+                  );
+                });
+              },
+              child: const Text('Publicar carro'),
           ),
         ),
       ),

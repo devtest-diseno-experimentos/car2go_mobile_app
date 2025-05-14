@@ -14,16 +14,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final mechanicProvider = Provider.of<MechanicProvider>(
-      context,
-      listen: false,
-    );
-    mechanicProvider.loadVehicles();
+    final mechanicProvider = Provider.of<MechanicProvider>(context, listen: false);
+    if (!mechanicProvider.hasLoadedVehicles) {
+      mechanicProvider.loadVehicles();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final mechanicProvider = Provider.of<MechanicProvider>(context);
+
+    if (mechanicProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (mechanicProvider.pendingVehicles.isEmpty &&
+        mechanicProvider.reviewedVehicles.isEmpty) {
+      return const Center(child: Text("No hay vehículos disponibles"));
+    }
 
     return RefreshIndicator(
       onRefresh: () => mechanicProvider.loadVehicles(),
@@ -34,7 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             GestureDetector(
               onTap: () {
-                // TODO: Navegar a la lista de autos revisados
+                // TODO: Navegar a la lista de autos verificados
               },
               child: _buildCard(
                 title: "Autos Verificados",
