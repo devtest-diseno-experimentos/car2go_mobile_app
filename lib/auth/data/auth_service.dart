@@ -10,50 +10,74 @@ class AuthService {
       ) async {
     final url = Uri.parse(Constant.getEndpoint('authentication/sign-in'));
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"username": username, "password": password}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      final prefs = await SharedPreferences.getInstance();
-      final userId = data['id'];
-
-      await prefs.setString('token', data['token']);
-      await prefs.setString('username', data['username']);
-      await prefs.setInt('userId', userId);
-
-      final roleResponse = await http.get(
-        Uri.parse(Constant.getEndpoint('users/$userId')),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer ${data['token']}",
-        },
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"username": username, "password": password}),
       );
 
-      if (roleResponse.statusCode == 200) {
-        final roleData = jsonDecode(roleResponse.body);
-        final roles = roleData['roles'];
-        if (roles != null && roles.isNotEmpty) {
-          await prefs.setString('role', roles[0]);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        final prefs = await SharedPreferences.getInstance();
+        final userId = data['id'];
+        final token = data['token'];
+        final user = data['username'];
+
+        await prefs.setString('token', token);
+        await prefs.setString('username', user);
+        await prefs.setInt('userId', userId);
+
+        final roleResponse = await http.get(
+          Uri.parse(Constant.getEndpoint('users/$userId')),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token",
+          },
+        );
+
+        if (roleResponse.statusCode == 200) {
+          final roleData = jsonDecode(roleResponse.body);
+          final roles = roleData['roles'];
+          if (roles != null && roles.isNotEmpty) {
+            await prefs.setString('role', roles[0]);
+          }
         }
+
+        final profileResponse = await http.get(
+          Uri.parse(Constant.getEndpoint('profiles/me')),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token",
+          },
+        );
+
+        if (profileResponse.statusCode == 200) {
+          final profileData = jsonDecode(profileResponse.body);
+
+          await prefs.setInt('profileId', profileData['profileId']);
+
+        } else {
+          print("❌ Error al obtener el perfil: ${profileResponse.statusCode}");
+        }
+
+        return {
+          'token': token,
+          'username': user,
+          'id': userId,
+        };
       } else {
-
+        print("Login error: ${response.statusCode}");
+        return null;
       }
-
-      return {
-        'token': data['token'],
-        'username': data['username'],
-        'id': userId,
-      };
-    } else {
-      print("Login error: ${response.statusCode}");
+    } catch (e) {
+      print("Error en login: $e");
       return null;
     }
   }
+
+
 
   static Future<bool> register(
     String username,

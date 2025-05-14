@@ -14,6 +14,8 @@ class _ShowStoredPreferencesScreenState
   String _username = '';
   String _token = '';
   String _role = '';
+  int _userId = -1;
+  int _profileId = -1;
 
   @override
   void initState() {
@@ -26,11 +28,15 @@ class _ShowStoredPreferencesScreenState
     final username = prefs.getString('username') ?? 'No username stored';
     final token = prefs.getString('token') ?? 'No token stored';
     final role = prefs.getString('role') ?? 'No role stored';
+    final userId = prefs.getInt('userId') ?? -1;
+    final profileId = prefs.getInt('profileId') ?? -1;
 
     setState(() {
       _username = username;
       _token = token;
       _role = role;
+      _userId = userId;
+      _profileId = profileId;
     });
   }
 
@@ -51,6 +57,10 @@ class _ShowStoredPreferencesScreenState
             Text('Token: $_token'),
             const SizedBox(height: 20),
             Text('Role: $_role'),
+            const SizedBox(height: 20),
+            Text('User ID: $_userId'),
+            const SizedBox(height: 20),
+            Text('Profile ID: $_profileId'),
           ],
         ),
       ),
