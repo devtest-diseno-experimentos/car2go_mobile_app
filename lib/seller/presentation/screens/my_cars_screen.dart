@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import '../widgets/car_card.dart';
 import '../screens/car_detail_screen.dart';
+import 'package:car2go_mobile_app/seller/data/services/vehicle_service.dart';
+import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
 
-class MyCarsScreen extends StatelessWidget {
+class MyCarsScreen extends StatefulWidget {
   const MyCarsScreen({super.key});
+
+  @override
+  State<MyCarsScreen> createState() => _MyCarsScreenState();
+}
+
+class _MyCarsScreenState extends State<MyCarsScreen> {
+  late Future<List<Vehicle>> _vehiclesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _vehiclesFuture = VehicleService.fetchVehiclesByProfileId();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,37 +39,43 @@ class MyCarsScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: const [
-                  _NavigableCarCard(),
-                  _NavigableCarCard(),
-                  _NavigableCarCard(),
-                ],
+              child: FutureBuilder<List<Vehicle>>(
+                future: _vehiclesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No tienes vehículos.'));
+                  }
+
+                  final vehicles = snapshot.data!;
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: vehicles.length,
+                    itemBuilder: (context, index) {
+                      final vehicle = vehicles[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CarDetailScreen(),
+                            ),
+                          );
+                        },
+                        child: CarCard(vehicle: vehicle),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _NavigableCarCard extends StatelessWidget {
-  const _NavigableCarCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const CarDetailScreen(),
-          ),
-        );
-      },
-      child: const CarCard(),
     );
   }
 }

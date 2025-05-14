@@ -49,7 +49,6 @@ class VehicleService {
     }
   }
 
-  // Nueva función para obtener vehículos por profileId
   static Future<List<Vehicle>> fetchVehiclesByProfileId() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');

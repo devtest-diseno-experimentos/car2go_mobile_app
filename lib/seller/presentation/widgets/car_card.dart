@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
 
 class CarCard extends StatelessWidget {
-  const CarCard({super.key});
+  final Vehicle vehicle;
+
+  const CarCard({super.key, required this.vehicle});
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = vehicle.image.isNotEmpty ? vehicle.image[0] : null;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       elevation: 5,
@@ -14,34 +19,57 @@ class CarCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.asset(
-              'assets/images/img-car.png',
-              width: double.infinity,
-              height: 180,
-              fit: BoxFit.cover,
-            ),
+            child: imageUrl != null
+                ? Image.network(
+                    imageUrl,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/car.png',
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  )
+                : Image.asset(
+                    'assets/images/car.png',
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                  ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(8),
+          Padding(
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Modelo Auto', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                SizedBox(height: 4),
-                Text('Precio', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                SizedBox(height: 10),
                 Text(
-                  'Lorem ipsum dolor sit amet consectetur. Massa quis eget sollicitudin sit elit sollicitudin imperdiet felis elit.',
+                  '${vehicle.brand} ${vehicle.model}',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 4),
+                Text(
+                  'Precio: S/ ${vehicle.price.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  vehicle.description,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _SpecIcon(icon: Icons.calendar_today, label: '2023'),
-                    _SpecIcon(icon: Icons.speed, label: '25,000 km'),
-                    _SpecIcon(icon: Icons.local_gas_station, label: 'Petroleo'),
-                    _SpecIcon(icon: Icons.location_on, label: 'Lima'),
+                    _SpecIcon(icon: Icons.calendar_today, label: vehicle.year),
+                    _SpecIcon(icon: Icons.speed, label: '${vehicle.mileage.toStringAsFixed(0)} km'),
+                    _SpecIcon(icon: Icons.local_gas_station, label: vehicle.fuel),
+                    _SpecIcon(icon: Icons.location_on, label: vehicle.location),
                   ],
                 ),
               ],
