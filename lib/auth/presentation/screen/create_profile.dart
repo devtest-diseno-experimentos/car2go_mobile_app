@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/auth/data/auth_service.dart';
-import 'package:car2go_mobile_app/mechanic/presentation/screen/dashboard.dart';
+import 'package:car2go_mobile_app/shared/screens/main_screen.dart';
+
 
 class CreateProfilePage extends StatefulWidget {
   const CreateProfilePage({super.key});
@@ -61,10 +62,10 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
         ),
       );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -164,7 +165,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,
-                  ), // Letra color negro
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -175,7 +176,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(
                     0xFFB2CEFF,
-                  ), // Color de fondo #B2CEFF
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -187,7 +188,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                   style: TextStyle(
                     color: Color(0xFF2959AD),
                     fontSize: 16,
-                  ), // Letra color #2959AD
+                  ),
                 ),
               ),
             ],

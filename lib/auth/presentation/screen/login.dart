@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:car2go_mobile_app/main.dart';
+import 'package:car2go_mobile_app/shared/screens/main_screen.dart';
 import 'package:car2go_mobile_app/auth/presentation/screen/register.dart';
 import 'package:car2go_mobile_app/auth/data/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -210,9 +210,14 @@ class _LoginPageState extends State<LoginPage> {
                           if (result != null) {
                             final username = result['username'];
                             final token = result['token'];
+                            final role = result['role'];
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setString('username', username);
                             await prefs.setString('token', token);
+
+                            if (role != null) {
+                              await prefs.setString('role', role);
+                            }
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -230,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                               context,
                               MaterialPageRoute(
                                 builder:
-                                    (context) => const MyApp(initialIndex: 0),
+                                    (context) => const MainScreen(),
                               ),
                               (route) => false,
                             );

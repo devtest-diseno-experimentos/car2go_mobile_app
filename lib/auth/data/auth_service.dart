@@ -5,9 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static Future<Map<String, dynamic>?> login(
-    String username,
-    String password,
-  ) async {
+      String username,
+      String password,
+      ) async {
     final url = Uri.parse(Constant.getEndpoint('authentication/sign-in'));
 
     final response = await http.post(
@@ -20,14 +20,34 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       final prefs = await SharedPreferences.getInstance();
+      final userId = data['id'];
+
       await prefs.setString('token', data['token']);
       await prefs.setString('username', data['username']);
-      await prefs.setInt('userId', data['id']);
+      await prefs.setInt('userId', userId);
+
+      final roleResponse = await http.get(
+        Uri.parse(Constant.getEndpoint('users/$userId')),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ${data['token']}",
+        },
+      );
+
+      if (roleResponse.statusCode == 200) {
+        final roleData = jsonDecode(roleResponse.body);
+        final roles = roleData['roles'];
+        if (roles != null && roles.isNotEmpty) {
+          await prefs.setString('role', roles[0]);
+        }
+      } else {
+
+      }
 
       return {
         'token': data['token'],
         'username': data['username'],
-        'id': data['id'],
+        'id': userId,
       };
     } else {
       print("Login error: ${response.statusCode}");
@@ -75,7 +95,6 @@ class AuthService {
     final userId = prefs.getInt('userId');
 
     if (token == null || userId == null) {
-      print("❌ Error: No se encontró un token o id de usuario.");
       return false;
     }
 
