@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:car2go_mobile_app/mechanic/data/providers/mechanic_provider.dart';
 import 'package:car2go_mobile_app/mechanic/data/providers/review_provider.dart';
-import 'package:car2go_mobile_app/mechanic/presentation/screen/dashboard.dart';
-import 'package:car2go_mobile_app/mechanic/presentation/screen/technical_review.dart';
-import 'package:car2go_mobile_app/seller/presentation/screens/my_cars_screen.dart';
-import 'package:car2go_mobile_app/shared/widgets/custom_bottom_nav.dart';
-import 'package:car2go_mobile_app/shared/widgets/custom_app_bar.dart';
+import 'package:car2go_mobile_app/auth/presentation/screen/login.dart';
+import 'package:car2go_mobile_app/shared/screens/main_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(
@@ -21,37 +19,34 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  final int initialIndex;
-
-  const MyApp({super.key, this.initialIndex = 0});
+  const MyApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  late int _currentIndex;
-
-  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-  ];
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
+
+    _checkLoginStatus();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MechanicProvider>(context, listen: false).loadVehicles();
+    });
   }
 
-  bool get _showBars => true;
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username');
+    final token = prefs.getString('token');
 
-  void _onTabTapped(int index) {
-    if (_currentIndex == index) {
-      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
-    } else {
+    if (username != null && token != null) {
       setState(() {
-        _currentIndex = index;
+        _isLoggedIn = true;
       });
     }
   }
@@ -60,6 +55,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Car2Go',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
@@ -68,44 +64,7 @@ class _MyAppState extends State<MyApp> {
           elevation: 0,
         ),
       ),
-      home: Scaffold(
-        appBar: _showBars ? const CustomAppBar() : null,
-        body: Stack(
-          children: List.generate(_navigatorKeys.length, (index) {
-            return Offstage(
-              offstage: _currentIndex != index,
-              child: Navigator(
-                key: _navigatorKeys[index],
-                onGenerateRoute: (settings) {
-                  return MaterialPageRoute(
-                    builder: (context) => _getScreenForIndex(index),
-                  );
-                },
-              ),
-            );
-          }),
-        ),
-        bottomNavigationBar:
-            _showBars
-                ? CustomBottomNavBar(
-                  currentIndex: _currentIndex,
-                  onTap: _onTabTapped,
-                )
-                : null,
-      ),
+      home: _isLoggedIn ? const MainScreen() : const LoginPage(),
     );
-  }
-
-  Widget _getScreenForIndex(int index) {
-    switch (index) {
-      case 0:
-        return DashboardScreen();
-      case 1:
-        return TechnicalReviewScreen();
-      case 2:
-        return MyCarsScreen();
-      default:
-        return DashboardScreen();
-    }
   }
 }

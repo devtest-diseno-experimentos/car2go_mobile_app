@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/car_card.dart';
-import '../screens/car_form_screen.dart';
-import '../screens/car_detail_screen.dart'; 
+import '../screens/car_detail_screen.dart';
+
 class MyCarsScreen extends StatelessWidget {
   const MyCarsScreen({super.key});
 
@@ -11,36 +11,14 @@ class MyCarsScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Mis carros',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CarFormScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2959AD),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('Vender carro'),
                   ),
                 ],
               ),
