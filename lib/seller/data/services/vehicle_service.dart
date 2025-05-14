@@ -48,4 +48,32 @@ class VehicleService {
       throw Exception('Fallo al cargar vehículo');
     }
   }
+
+  // Nueva función para obtener vehículos por profileId
+  static Future<List<Vehicle>> fetchVehiclesByProfileId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final profileId = prefs.getInt('profileId');
+
+    if (profileId == null) {
+      throw Exception('No se encontró profileId en las preferencias');
+    }
+
+    final url = Uri.parse(Constant.getEndpoint('vehicle/all/vehicles/profile/$profileId'));
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((vehicleJson) => Vehicle.fromJson(vehicleJson)).toList();
+    } else {
+      print('Error al obtener vehículos por profileId: ${response.body}');
+      throw Exception('Fallo al cargar vehículos por profileId');
+    }
+  }
 }
