@@ -105,7 +105,7 @@ class _SpecIcon extends StatelessWidget {
       width: 80,
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.yellow[700],
+        color: const Color(0xFFF4C23D),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
