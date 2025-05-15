@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
 import 'package:car2go_mobile_app/seller/data/services/vehicle_service.dart';
@@ -13,11 +14,17 @@ class CarDetailScreen extends StatefulWidget {
 
 class _CarDetailScreenState extends State<CarDetailScreen> {
   late Future<Vehicle> _vehicleFuture;
+  String? _mainImage;
 
   @override
   void initState() {
     super.initState();
     _vehicleFuture = VehicleService.fetchVehicleById(widget.vehicleId);
+    _vehicleFuture.then((vehicle) {
+      setState(() {
+        _mainImage = vehicle.image.isNotEmpty ? vehicle.image[0] : null;
+      });
+    });
   }
 
   @override
@@ -56,7 +63,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                              'S/ ${vehicle.price.toStringAsFixed(2)}', // Usando el precio del vehículo
+                              'S/ ${vehicle.price.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
@@ -68,14 +75,14 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {}, // Sin funcionalidad, pero visualmente habilitado
+                            onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2959AD), // Azul exacto
+                              backgroundColor: const Color(0xFF2959AD),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              elevation: 0, // Sin sombra
+                              elevation: 0,
                             ),
                             child: const Text(
                               'Mandar oferta',
@@ -96,7 +103,38 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   Widget _buildDetail(Vehicle vehicle) {
-    final imageUrl = vehicle.image.isNotEmpty ? vehicle.image[0] : null;
+    Widget displayImage(String? img, {Key? key}) {
+      if (img != null && img.startsWith('data:image')) {
+        final base64Str = img.split(',').last;
+        return Image.memory(
+          base64Decode(base64Str),
+          key: key,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              Image.asset('assets/images/car.png', width: double.infinity, height: 200, fit: BoxFit.cover),
+        );
+      } else if (img != null && img.startsWith('http')) {
+        return Image.network(
+          img,
+          key: key,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              Image.asset('assets/images/car.png', width: double.infinity, height: 200, fit: BoxFit.cover),
+        );
+      } else {
+        return Image.asset(
+          'assets/images/car.png',
+          key: key ?? const ValueKey('default_image'),
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+        );
+      }
+    }
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -104,23 +142,28 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${vehicle.brand} ${vehicle.model}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
+            Expanded(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${vehicle.brand} ${vehicle.model}',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: () {
-                // Acción editar
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2959AD),
                 foregroundColor: Colors.white,
@@ -131,60 +174,92 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
             ),
           ],
         ),
+
         const SizedBox(height: 16),
+
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: imageUrl != null
-              ? Image.network(
-                  imageUrl,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                    'assets/images/car.png',
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : Image.asset(
-                  'assets/images/car.png',
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                ),
-        ),
-        const SizedBox(height: 10),
-        if (vehicle.status.toLowerCase() == 'revisado')
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text('Revisado', style: TextStyle(color: Colors.white)),
-              ),
-            ],
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child: displayImage(_mainImage, key: ValueKey(_mainImage)),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
           ),
-        const SizedBox(height: 16),
-        // Usamos Wrap para los íconos, con tamaño fijo para cada ícono
-        Wrap(
-          spacing: 12, // Espacio entre los íconos
-          runSpacing: 12, // Espacio entre filas
-          alignment: WrapAlignment.center, // Centrar los íconos
-          children: [
-            _SpecIcon(icon: Icons.calendar_today, label: vehicle.year.toString()),
-            _SpecIcon(icon: Icons.speed, label: '${vehicle.mileage.toStringAsFixed(0)} km'),
-            _SpecIcon(icon: Icons.local_gas_station, label: vehicle.fuel),
-            _SpecIcon(icon: Icons.location_on, label: vehicle.location),
-            _SpecIcon(icon: Icons.route, label: '${vehicle.speed} km/h'),
-            _SpecIcon(icon: Icons.engineering, label: vehicle.engine),
-            _SpecIcon(icon: Icons.water_drop, label: vehicle.color),
-          ],
         ),
+
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _getStatusColor(vehicle.status),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              _getStatusLabel(vehicle.status),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        if (vehicle.image.isNotEmpty)
+          SizedBox(
+            height: 70,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: vehicle.image.length,
+              itemBuilder: (context, index) {
+                final img = vehicle.image[index];
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _mainImage = img;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: displayImage(img),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+        const SizedBox(height: 24),
+        const Text('Descripción general', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+
+
+        LayoutBuilder(builder: (context, constraints) {
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              _SpecIcon(icon: Icons.calendar_today, label: vehicle.year.toString()),
+              _SpecIcon(icon: Icons.speed, label: '${vehicle.mileage.toStringAsFixed(0)} km'),
+              _SpecIcon(icon: Icons.local_gas_station, label: vehicle.fuel),
+              _SpecIcon(icon: Icons.location_on, label: vehicle.location),
+              _SpecIcon(icon: Icons.route, label: '${vehicle.speed} km/h'),
+              _SpecIcon(icon: Icons.engineering, label: vehicle.engine),
+              _SpecIcon(icon: Icons.water_drop, label: vehicle.color),
+            ],
+          );
+        }),
+
         const SizedBox(height: 24),
         const Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 8),
@@ -194,6 +269,32 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
         ),
       ],
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return Colors.grey;
+      case 'REVIEWED':
+        return Colors.green;
+      case 'REJECT':
+        return Colors.red;
+      default:
+        return Colors.grey[700]!;
+    }
+  }
+
+  String _getStatusLabel(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'En revisión';
+      case 'REVIEWED':
+        return 'Revisado';
+      case 'REJECT':
+        return 'Rechazado';
+      default:
+        return status;
+    }
   }
 }
 
@@ -205,21 +306,38 @@ class _SpecIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double itemWidth = (MediaQuery.of(context).size.width - 20 * 2 - 12 * 3) / 4;
+
     return Container(
-      width: 80, // Ancho fijo
-      height: 100, // Alto fijo
-      padding: const EdgeInsets.all(10),
+      width: itemWidth,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.yellow[700],
+        color: const Color(0xFFF4C23D),
         borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          )
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center, // Centrar los íconos y texto
         children: [
-          Icon(icon, size: 30, color: Colors.black), // Ícono más grande para visibilidad
-          const SizedBox(height: 6),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.black)),
+          Icon(icon, size: 28, color: Colors.black87),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
         ],
       ),
     );

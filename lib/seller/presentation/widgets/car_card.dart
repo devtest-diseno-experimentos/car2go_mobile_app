@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
 
@@ -10,7 +11,38 @@ class CarCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrl = vehicle.image.isNotEmpty ? vehicle.image[0] : null;
 
+    Widget displayImage(String? img) {
+      if (img != null && img.startsWith('data:image')) {
+        final base64Str = img.split(',').last;
+        return Image.memory(
+          base64Decode(base64Str),
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              Image.asset('assets/images/car.png', width: double.infinity, height: 180, fit: BoxFit.cover),
+        );
+      } else if (img != null && img.startsWith('http')) {
+        return Image.network(
+          img,
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              Image.asset('assets/images/car.png', width: double.infinity, height: 180, fit: BoxFit.cover),
+        );
+      } else {
+        return Image.asset(
+          'assets/images/car.png',
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+        );
+      }
+    }
+
     return Card(
+      color: Colors.white,
       margin: const EdgeInsets.only(bottom: 20),
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -19,25 +51,7 @@ class CarCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    width: double.infinity,
-                    height: 180,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                      'assets/images/car.png',
-                      width: double.infinity,
-                      height: 180,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Image.asset(
-                    'assets/images/car.png',
-                    width: double.infinity,
-                    height: 180,
-                    fit: BoxFit.cover,
-                  ),
+            child: displayImage(imageUrl),
           ),
           Padding(
             padding: const EdgeInsets.all(8),
@@ -50,7 +64,7 @@ class CarCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Precio: S/ ${vehicle.price.toStringAsFixed(2)}',
+                  'S/ ${vehicle.price.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
