@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/car_card.dart';
-import '../screens/car_detail_screen.dart';
+import 'car_detail_screen.dart';
 import 'package:car2go_mobile_app/seller/data/services/vehicle_service.dart';
 import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
 
@@ -62,7 +62,8 @@ class _MyCarsScreenState extends State<MyCarsScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CarDetailScreen(),
+                              builder: (context) =>
+                                  CarDetailScreen(vehicleId: vehicle.id),
                             ),
                           );
                         },

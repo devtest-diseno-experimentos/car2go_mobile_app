@@ -25,14 +25,12 @@ class CarCard extends StatelessWidget {
                     width: double.infinity,
                     height: 180,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'assets/images/car.png',
-                        width: double.infinity,
-                        height: 180,
-                        fit: BoxFit.cover,
-                      );
-                    },
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      'assets/images/car.png',
+                      width: double.infinity,
+                      height: 180,
+                      fit: BoxFit.cover,
+                    ),
                   )
                 : Image.asset(
                     'assets/images/car.png',
