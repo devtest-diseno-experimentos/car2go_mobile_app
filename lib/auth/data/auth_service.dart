@@ -59,7 +59,7 @@ class AuthService {
           await prefs.setInt('profileId', profileData['profileId']);
 
         } else {
-          print("❌ Error al obtener el perfil: ${profileResponse.statusCode}");
+          print("Error al obtener el perfil: ${profileResponse.statusCode}");
         }
 
         return {
@@ -145,10 +145,10 @@ class AuthService {
     );
 
     if (response.statusCode == 201 || response.statusCode == 200) {
-      print("✅ Perfil creado exitosamente.");
+      print("Perfil creado exitosamente.");
       return true;
     } else {
-      print("❌ Error al crear el perfil: ${response.statusCode}");
+      print("Error al crear el perfil: ${response.statusCode}");
       print("Detalles: ${response.body}");
       return false;
     }

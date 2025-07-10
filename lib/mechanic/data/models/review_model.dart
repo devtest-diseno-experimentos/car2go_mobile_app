@@ -3,7 +3,7 @@ class Review {
   final String reviewedBy;
   final String notes;
   final DateTime reviewDate;
-  final Vehicle vehicle;
+  final Vehicles vehicle;
 
   Review({
     required this.id,
@@ -19,12 +19,12 @@ class Review {
       reviewedBy: json['reviewedBy'],
       notes: json['notes'],
       reviewDate: DateTime.parse(json['reviewDate']),
-      vehicle: Vehicle.fromJson(json['vehicle']),
+      vehicle: Vehicles.fromJson(json['vehicle']),
     );
   }
 }
 
-class Vehicle {
+class Vehicles {
   final int id;
   final String name;
   final String brand;
@@ -35,7 +35,7 @@ class Vehicle {
   final String engine;
   final String status;
 
-  Vehicle({
+  Vehicles({
     required this.id,
     required this.name,
     required this.brand,
@@ -47,8 +47,8 @@ class Vehicle {
     required this.status,
   });
 
-  factory Vehicle.fromJson(Map<String, dynamic> json) {
-    return Vehicle(
+  factory Vehicles.fromJson(Map<String, dynamic> json) {
+    return Vehicles(
       id: json['id'],
       name: json['name'],
       brand: json['brand'],

@@ -49,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (registerSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Registro exitoso. Iniciando sesión...'),
+          content: Text('Registro exitoso. Iniciando sesión...'),
           backgroundColor: Colors.green,
         ),
       );
@@ -64,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('❌ Error al iniciar sesión después del registro.'),
+            content: Text('Error al iniciar sesión después del registro.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -72,7 +72,7 @@ class _RegisterPageState extends State<RegisterPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('❌ Error al registrar el usuario.'),
+          content: Text('Error al registrar el usuario.'),
           backgroundColor: Colors.red,
         ),
       );

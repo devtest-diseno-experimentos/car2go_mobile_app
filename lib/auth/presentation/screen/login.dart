@@ -222,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '✅ Inicio de sesión correcto: $username',
+                                  'Inicio de sesión correcto: $username',
                                 ),
                                 backgroundColor: Colors.green,
                                 duration: const Duration(seconds: 2),
@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('❌ Credenciales incorrectas'),
+                                content: Text('Credenciales incorrectas'),
                                 backgroundColor: Colors.red,
                               ),
                             );

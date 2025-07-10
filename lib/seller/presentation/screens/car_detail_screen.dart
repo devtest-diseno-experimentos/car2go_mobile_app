@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:car2go_mobile_app/seller/data/models/vehicle_model.dart';
 import 'package:car2go_mobile_app/seller/data/services/vehicle_service.dart';
+import 'package:car2go_mobile_app/mechanic/data/services/review_service.dart';
+import 'package:car2go_mobile_app/mechanic/data/models/review_model.dart';
+import 'package:intl/intl.dart';
 
 class CarDetailScreen extends StatefulWidget {
   final int vehicleId;
@@ -14,17 +17,219 @@ class CarDetailScreen extends StatefulWidget {
 
 class _CarDetailScreenState extends State<CarDetailScreen> {
   late Future<Vehicle> _vehicleFuture;
+  Future<Review>? _reviewFuture;
   String? _mainImage;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _loadVehicleData();
+  }
+
+  Future<void> _loadVehicleData() async {
     _vehicleFuture = VehicleService.fetchVehicleById(widget.vehicleId);
     _vehicleFuture.then((vehicle) {
       setState(() {
         _mainImage = vehicle.image.isNotEmpty ? vehicle.image[0] : null;
+
+        // Solo cargar la revisión si el vehículo ha sido revisado
+        if (vehicle.status == 'REVIEWED' ||
+            vehicle.status == 'REJECT' ||
+            vehicle.status == 'REQUIRES_REPAIR' ||
+            vehicle.status == 'REPAIR_REQUESTED' ||
+            vehicle.status == 'APPROVED_AFTER_REPAIR') {
+          _reviewFuture = ReviewService.getReviewForVehicle(widget.vehicleId);
+        }
       });
     });
+  }
+
+  Future<void> _requestRepair(int reviewId) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await ReviewService.updateReviewStatus(
+          reviewId: reviewId,
+          status: VehicleStatus.REPAIR_REQUESTED
+      );
+
+      // Recargar los datos del vehículo para reflejar el cambio de estado
+      await _loadVehicleData();  // Recarga los datos del vehículo
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Solicitud de reparación enviada correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al solicitar reparación: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _rejectRepair(int reviewId) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await ReviewService.updateReviewStatus(
+          reviewId: reviewId,
+          status: VehicleStatus.REJECT
+      );
+
+      // Recargar los datos del vehículo para reflejar el cambio de estado
+      await _loadVehicleData();  // Recarga los datos del vehículo
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Reparación rechazada correctamente'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al rechazar la reparación: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Método para mostrar diálogo de confirmación
+  void _showConfirmationDialog(int reviewId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text('Confirmar rechazo'),
+          content: const Text('¿Estás seguro de que deseas rechazar la reparación?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _rejectRepair(reviewId);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Rechazar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showReviewDetailsModal(Review review) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final formattedDate = review.reviewDate != null
+            ? DateFormat('dd/MM/yyyy HH:mm').format(review.reviewDate!)
+            : 'Fecha no disponible';
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Detalles de revisión técnica',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+
+              _DetailItem(
+                icon: Icons.calendar_month,
+                title: 'Fecha de revisión',
+                content: formattedDate,
+              ),
+              const SizedBox(height: 16),
+
+              // Notas del técnico
+              const Text(
+                'Notas del técnico:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Text(
+                      review.notes ?? 'No hay notas disponibles',
+                      style: const TextStyle(height: 1.5),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -93,6 +298,13 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                       ],
                     ),
                   ),
+                  if (_isLoading)
+                    Container(
+                      color: Colors.black.withOpacity(0.4),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
                 ],
               );
             }
@@ -242,7 +454,6 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
         const Text('Descripción general', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
 
-
         LayoutBuilder(builder: (context, constraints) {
           return Wrap(
             spacing: 12,
@@ -267,6 +478,103 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
           vehicle.description,
           style: const TextStyle(height: 1.4),
         ),
+
+        if (_reviewFuture != null) ...[
+          const SizedBox(height: 24),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Informe de revisión técnica',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              FutureBuilder<Review>(
+                future: _reviewFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
+                    return const SizedBox();
+                  } else {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => _showReviewDetailsModal(snapshot.data!),
+                        icon: const Icon(Icons.info_outline),
+                        label: const Text('Ver detalles'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF2959AD),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          FutureBuilder<Review>(
+            future: _reviewFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Text('Error al cargar la información de revisión: ${snapshot.error}');
+              } else if (!snapshot.hasData) {
+                return const Text('No hay información de revisión disponible');
+              } else {
+                final review = snapshot.data!;
+
+                // Botón para solicitar reparación
+                if (vehicle.status.toUpperCase() == 'REQUIRES_REPAIR') {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _requestRepair(review.id!),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF4C23D),
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Solicitar reparación',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  );
+                }
+                else if (vehicle.status.toUpperCase() == 'REPAIR_REQUESTED') {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _showConfirmationDialog(review.id!),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Rechazar reparación',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox();
+              }
+            },
+          ),
+        ],
       ],
     );
   }
@@ -279,6 +587,12 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
         return Colors.green;
       case 'REJECT':
         return Colors.red;
+      case 'REQUIRES_REPAIR':
+        return Colors.orange;
+      case 'REPAIR_REQUESTED':
+        return Colors.blue;
+      case 'APPROVED_AFTER_REPAIR':
+        return Colors.green.shade700;
       default:
         return Colors.grey[700]!;
     }
@@ -292,6 +606,12 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
         return 'Revisado';
       case 'REJECT':
         return 'Rechazado';
+      case 'REQUIRES_REPAIR':
+        return 'Requiere reparación';
+      case 'REPAIR_REQUESTED':
+        return 'Reparación solicitada';
+      case 'APPROVED_AFTER_REPAIR':
+        return 'Aprobado después de reparación';
       default:
         return status;
     }
@@ -340,6 +660,51 @@ class _SpecIcon extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DetailItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String content;
+
+  const _DetailItem({
+    required this.icon,
+    required this.title,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: const Color(0xFF2959AD)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                content,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

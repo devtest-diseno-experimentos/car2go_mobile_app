@@ -57,7 +57,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Perfil creado exitosamente.'),
+          content: Text('Perfil creado exitosamente.'),
           backgroundColor: Colors.green,
         ),
       );
@@ -69,7 +69,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('❌ Error al crear el perfil.'),
+          content: Text('Error al crear el perfil.'),
           backgroundColor: Colors.red,
         ),
       );

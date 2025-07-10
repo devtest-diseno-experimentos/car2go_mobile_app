@@ -1,6 +1,6 @@
 class Constant {
   static const String BASE_URL =
-      "https://car2go-platform-hpdzhtb8ekceg9gd.canadacentral-01.azurewebsites.net/";
+      "http://10.0.2.2:8080/";
 
   static const String RESOURCE_PATH = "api/v1/";
 

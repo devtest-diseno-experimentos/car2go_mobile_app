@@ -33,7 +33,7 @@ class MechanicProvider with ChangeNotifier {
     try {
       _allVehicles = await VehicleService.fetchAllVehicles();
       _pendingVehicles =
-          _allVehicles.where((v) => v.status == 'PENDING').toList();
+          _allVehicles.where((v) =>  v.status == 'PENDING' || v.status == 'REPAIR_REQUESTED').toList();
       _reviewedVehicles =
           _allVehicles.where((v) => v.status == 'REVIEWED').toList();
       hasLoadedVehicles = true;

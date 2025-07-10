@@ -75,4 +75,74 @@ class VehicleService {
       throw Exception('Fallo al cargar vehículos por profileId');
     }
   }
+
+  static Future<bool> createVehicle({
+    required String name,
+    required String phone,
+    required String email,
+    required String brand,
+    required String model,
+    required String color,
+    required String year,
+    required double price,
+    required String transmission,
+    required String engine,
+    required double mileage,
+    required String doors,
+    required String plate,
+    required String location,
+    required String description,
+    required List<String> images,
+    required String fuel,
+    required int speed,
+  }) async {
+    final url = Uri.parse(Constant.getEndpoint('vehicle'));
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final userId = prefs.getInt('userId');
+
+    if (token == null || userId == null) {
+      return false;
+    }
+
+    final body = jsonEncode({
+      "name": name,
+      "phone": phone,
+      "email": email,
+      "brand": brand,
+      "model": model,
+      "color": color,
+      "year": year,
+      "price": price,
+      "transmission": transmission,
+      "engine": engine,
+      "mileage": mileage,
+      "doors": doors,
+      "plate": plate,
+      "location": location,
+      "description": description,
+      "images": images,
+      "fuel": fuel,
+      "speed": speed,
+    });
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      print("Vehículo creado exitosamente.");
+      return true;
+    } else {
+      print("Error al crear el vehículo: ${response.statusCode}");
+      print("Detalles: ${response.body}");
+      return false;
+    }
+  }
 }
